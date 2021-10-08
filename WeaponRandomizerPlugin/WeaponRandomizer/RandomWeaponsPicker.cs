@@ -44,7 +44,6 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         
         public Dictionary<string, string> PickNextRandomIds()
         {
-            var nextGearIds = new List<string>();
             var gearIdsByPlayer = new Dictionary<string, string>(); 
 
             foreach (var player in SNet.LobbyPlayers)
@@ -53,9 +52,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
                 {
                     InitWeaponsDict(player.NickName);
                 }
-
-                nextGearIds.AddRange(SlotsToRandomize.Select(slot => _gearListPerPlayer[player.NickName][slot].Next().PlayfabItemId));
-                gearIdsByPlayer.Add(player.NickName, string.Join(",", nextGearIds));
+                gearIdsByPlayer.Add(player.NickName, string.Join(",", SlotsToRandomize.Select(slot => _gearListPerPlayer[player.NickName][slot].Next().PlayfabItemId)));
             }
 
             return gearIdsByPlayer;
@@ -63,12 +60,12 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         
         public Dictionary<string, string> PickNextUniqueIds()
         {
-            var nextGearIds = new List<string>();
             var pickedGearIds = new List<string>();
             var gearIdsByPlayer = new Dictionary<string, string>(); 
 
             foreach (var player in SNet.LobbyPlayers)
             {
+                var nextGearIds = new List<string>();
                 if (!_gearListPerPlayer.ContainsKey(player.NickName))
                 {
                     InitWeaponsDict(player.NickName);
