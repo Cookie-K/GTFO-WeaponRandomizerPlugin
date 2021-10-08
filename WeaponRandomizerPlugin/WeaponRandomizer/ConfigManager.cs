@@ -31,7 +31,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         private static readonly ConfigEntry<int> Fuzz = ConfigFile
             .Bind("Randomization Triggers", nameof (IntervalFuzz), 0, 
                 "If randomizing by interval, fuzz the interval.\n" +
-                "Eg. if Interval is 60s and fuzz is 10s, randomize will happen at any time between 50s or 70s");
+                "Eg. if Interval is 60s and fuzz is 10s, the interval will be randomly set on every trigger to be a time between 50s or 70s");
 
         private static readonly ConfigEntry<bool> Melee = ConfigFile
             .Bind("Randomization Slots", nameof (RandomizeMelee), true, "Randomize Melee weapons.");

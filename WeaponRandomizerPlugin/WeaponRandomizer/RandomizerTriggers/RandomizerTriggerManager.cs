@@ -76,7 +76,8 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
 
         private void FuzzInterval()
         {
-            _timer.Change(0, TimerDuration + Rng.Next(-TimerFuzz, TimerFuzz));
+            var timerDuration = TimerDuration + Rng.Next(-TimerFuzz, TimerFuzz);
+            _timer.Change(timerDuration, timerDuration);
         }
 
         private void EndTimer()
