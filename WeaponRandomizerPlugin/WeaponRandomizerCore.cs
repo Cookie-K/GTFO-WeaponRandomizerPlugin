@@ -5,7 +5,6 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnhollowerRuntimeLib;
 using WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers;
-using WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggerSubjects;
 
 namespace WeaponRandomizerPlugin
 {
@@ -22,16 +21,13 @@ namespace WeaponRandomizerPlugin
 
         public static ManualLogSource log;
 
-        public Harmony HarmonyPatches { get; private set; }
-
-        public static WeaponRandomizerCore Instance { get; private set; }
+        private Harmony HarmonyPatches { get; set; }
 
         public override void Load()
         {
             log = Log;
-            Instance = this;
 
-            ClassInjector.RegisterTypeInIl2Cpp<WeaponRandomizer.WeaponRandomizer>();
+            ClassInjector.RegisterTypeInIl2Cpp<WeaponRandomizer.WeaponRandomizerManager>();
             ClassInjector.RegisterTypeInIl2Cpp<RandomizerTriggerManager>();
             ClassInjector.RegisterTypeInIl2Cpp<RandomizerSync>();
 

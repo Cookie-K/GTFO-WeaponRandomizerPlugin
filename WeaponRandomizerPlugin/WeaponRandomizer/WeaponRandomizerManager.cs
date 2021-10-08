@@ -12,7 +12,7 @@ using WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers;
 
 namespace WeaponRandomizerPlugin.WeaponRandomizer
 {
-    public class WeaponRandomizer : MonoBehaviour
+    public class WeaponRandomizerManager : MonoBehaviour
     {
         public static event Action OnRandomize;
 
@@ -28,7 +28,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         private static readonly bool TreatSentriesAsOne = ConfigManager.TreatSentriesAsOne;
         private static readonly bool PickUpSentryOnSwitch = ConfigManager.PickUpSentryOnSwitch;
 
-        public WeaponRandomizer(IntPtr intPtr) : base(intPtr)
+        public WeaponRandomizerManager(IntPtr intPtr) : base(intPtr)
         {
             // For Il2CppAssemblyUnhollower
         }

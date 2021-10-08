@@ -27,7 +27,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
             NetworkingManager.RegisterEvent<WepRandomizerData>("Trigger_Randomize",  (senderId, packet) => 
             {
                 WeaponRandomizerCore.log.LogInfo($"Packet received for {packet.PlayerName}: {packet.GearIds}");
-                WeaponRandomizer.EquipFromPacket(packet);
+                WeaponRandomizerManager.EquipFromPacket(packet);
             });
         }
 

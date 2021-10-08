@@ -4,10 +4,10 @@ using LevelGeneration;
 using SNetwork;
 using UnityEngine;
 
-namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggerSubjects
+namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
 {
     [HarmonyPatch]
-    public class RandomizerTriggerPatches
+    public class RandomizerTriggerPatcher
     {
 
         public static event Action OnSecDoorOpen;

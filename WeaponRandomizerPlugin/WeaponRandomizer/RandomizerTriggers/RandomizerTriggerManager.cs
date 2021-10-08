@@ -1,7 +1,6 @@
 ﻿using System;
 using SNetwork;
 using UnityEngine;
-using WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggerSubjects;
 using Random = System.Random;
 using Timer = System.Threading.Timer;
 
@@ -27,15 +26,15 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
         {
             if (RandomizeOnTimer)
             {
-                RandomizerTriggerPatches.OnGameStateChange += OnGameStateChanged;
+                RandomizerTriggerPatcher.OnGameStateChange += OnGameStateChanged;
             }
             if (RandomizeOnSecDoorOpen)
             {
-                RandomizerTriggerPatches.OnSecDoorOpen += OnSecDoorOpen;
+                RandomizerTriggerPatcher.OnSecDoorOpen += OnSecDoorOpen;
             }
             if (TimerDuration > 0 && TimerFuzz > 0)
             {
-                WeaponRandomizer.OnRandomize += FuzzInterval;
+                WeaponRandomizerManager.OnRandomize += FuzzInterval;
             }
         }
 
@@ -44,7 +43,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
             if (!SNet.IsMaster) return;
             if (!_triggerTimedRandomize && !_triggerSecDoorRandomize) return;
             
-            WeaponRandomizer.Randomize();
+            WeaponRandomizerManager.Randomize();
             _triggerTimedRandomize = false;
             _triggerSecDoorRandomize = false;
         }
@@ -89,15 +88,15 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
         {
             if (RandomizeOnTimer)
             {
-                RandomizerTriggerPatches.OnGameStateChange -= OnGameStateChanged;
+                RandomizerTriggerPatcher.OnGameStateChange -= OnGameStateChanged;
             }
             if (RandomizeOnSecDoorOpen)
             {
-                RandomizerTriggerPatches.OnSecDoorOpen -= OnSecDoorOpen;
+                RandomizerTriggerPatcher.OnSecDoorOpen -= OnSecDoorOpen;
             }
             if (TimerDuration > 0 && TimerFuzz > 0)
             {
-                WeaponRandomizer.OnRandomize -= FuzzInterval;
+                WeaponRandomizerManager.OnRandomize -= FuzzInterval;
             }
         }
     }

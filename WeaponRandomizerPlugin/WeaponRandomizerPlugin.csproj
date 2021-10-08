@@ -444,10 +444,10 @@
         <Compile Include="WeaponRandomizer\enum\RandomPickType.cs" />
         <Compile Include="WeaponRandomizer\enum\RandomType.cs" />
         <Compile Include="WeaponRandomizer\RandomizerTriggers\RandomizerSync.cs" />
-        <Compile Include="WeaponRandomizer\RandomizerTriggers\RandomizerTriggerPatches.cs" />
+        <Compile Include="WeaponRandomizer\RandomizerTriggers\RandomizerTriggerPatcher.cs" />
         <Compile Include="WeaponRandomizer\RandomizerTriggers\RandomizerTriggerManager.cs" />
         <Compile Include="WeaponRandomizer\RandomWeaponsPicker.cs" />
-        <Compile Include="WeaponRandomizer\WeaponRandomizer.cs" />
+        <Compile Include="WeaponRandomizer\WeaponRandomizerManager.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
