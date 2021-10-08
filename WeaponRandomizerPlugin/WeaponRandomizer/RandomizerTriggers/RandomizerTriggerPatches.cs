@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using LevelGeneration;
 using SNetwork;
 using UnityEngine;
@@ -6,8 +7,12 @@ using UnityEngine;
 namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggerSubjects
 {
     [HarmonyPatch]
-    public class RandomizerPatchSubject
+    public class RandomizerTriggerPatches
     {
+
+        public static event Action OnSecDoorOpen;
+        public static event Action<eGameStateName> OnGameStateChange;
+        
         [HarmonyPatch(typeof(GameStateManager), "ChangeState", typeof(eGameStateName))]
         public static void Postfix(eGameStateName nextState) => GameChangeState(nextState);
         
@@ -20,12 +25,9 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggerSubjects
             SNet_Player player,
             LG_Door_Sync __instance) => OnDoorOpen(__instance);
         
-        private static void GameChangeState(eGameStateName? state = null)
+        private static void GameChangeState(eGameStateName state)
         {
-            if (!(state is null))
-            {
-                RandomizerTriggerMonitor.Instance.OnGameStateChanged((eGameStateName) state);
-            }
+            OnGameStateChange?.Invoke(state);
         }
 
         private static void OnDoorOpen(LG_Door_Sync __instance)
@@ -33,7 +35,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggerSubjects
             if ((__instance.m_core.DoorType == eLG_DoorType.Security || __instance.m_core.DoorType == eLG_DoorType.Apex) &&
                 __instance.m_core.LastStatus == eDoorStatus.Open)
             {
-                RandomizerTriggerMonitor.Instance.OnSecurityDoorOpen();
+                OnSecDoorOpen?.Invoke();
             } 
         }
 

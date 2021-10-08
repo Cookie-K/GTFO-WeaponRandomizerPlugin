@@ -3,88 +3,133 @@ using System.Collections.Generic;
 using System.Linq;
 using Gear;
 using GearSwapPlugin.GearSwap;
+using LibCpp2IL;
 using Player;
+using SNetwork;
 using UnityEngine;
-using Random = System.Random;
+using WeaponRandomizerPlugin.WeaponRandomizer.@enum;
+using WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers;
 
 namespace WeaponRandomizerPlugin.WeaponRandomizer
 {
     public class WeaponRandomizer : MonoBehaviour
     {
-        public static WeaponRandomizer Instance { get; private set; }
-        private static readonly Random Rng = new Random();
-        private static readonly bool TreatSentryAsOne = true;
-        private static readonly List<InventorySlot> SlotsToRandomize = new List<InventorySlot> {InventorySlot.GearMelee, InventorySlot.GearStandard, InventorySlot.GearSpecial, InventorySlot.GearClass};
-        private static readonly Dictionary<InventorySlot, List<GearIDRange>> GearIdBySlot = new Dictionary<InventorySlot, List<GearIDRange>>();
-        private static readonly Dictionary<InventorySlot, int> IndexBySlot = new Dictionary<InventorySlot, int>();
+        public static event Action OnRandomize;
 
+        private static RandomWeaponsSelector _rngWeaponsSelector;
+        private static readonly List<InventorySlot> SlotsToRandomize = new List<InventorySlot>();
+        private static readonly Dictionary<InventorySlot, List<GearIDRange>> GearIdsBySlot = new Dictionary<InventorySlot, List<GearIDRange>>();
+        private static readonly SelectionType SelectionType = ConfigManager.SelectionType;
+        private static readonly DistributionType DistributionType = ConfigManager.DistributionType;
+        private static readonly bool RandomizeMelee = ConfigManager.RandomizeMelee;
+        private static readonly bool RandomizePrimary = ConfigManager.RandomizePrimary;
+        private static readonly bool RandomizeSecondary = ConfigManager.RandomizeSecondary;
+        private static readonly bool RandomizeTool = ConfigManager.RandomizeTool;
+        private static readonly bool TreatSentriesAsOne = ConfigManager.TreatSentriesAsOne;
+        private static readonly bool PickUpSentryOnSwitch = ConfigManager.PickUpSentryOnSwitch;
 
         public WeaponRandomizer(IntPtr intPtr) : base(intPtr)
         {
             // For Il2CppAssemblyUnhollower
         }
 
-        private void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(this.gameObject);
-            } else {
-                Instance = this;
-            }
-        }
-
         private void Start()
         {
-            Init();
-        }
-      
-        private void Init()
-        {
-            WeaponRandomizerCore.log.LogInfo("Initializing random list");
+            if (RandomizeMelee)
+            {
+                SlotsToRandomize.Add(InventorySlot.GearMelee);
+            }
+            if (RandomizePrimary)
+            {
+                SlotsToRandomize.Add(InventorySlot.GearStandard);
+            }
+            if (RandomizeSecondary)
+            {
+                SlotsToRandomize.Add(InventorySlot.GearSpecial);
+            }
+            if (RandomizeTool)
+            {
+                SlotsToRandomize.Add(InventorySlot.GearClass);
+            }
+            
             foreach (var slot in SlotsToRandomize)
             {
-                GearIdBySlot[slot] = new List<GearIDRange>();
+                GearIdsBySlot[slot] = new List<GearIDRange>();
                 foreach (var gearId in GearManager.GetAllGearForSlot(slot))
                 {
-                    GearIdBySlot[slot].Add(gearId);
+                    GearIdsBySlot[slot].Add(gearId);
                 }
-
-                GearIdBySlot[slot] = ShuffleList(GearIdBySlot[slot]);
-                IndexBySlot[slot] = 0;
             }
 
-            GearLoadingManager.PickUpSentryOnToolChange = false;
+            if (TreatSentriesAsOne && SlotsToRandomize.Contains(InventorySlot.GearClass))
+            {
+                // add non sentry items per sentry to increase chance of other tools appearing
+                var sentryTools = GearIdsBySlot[InventorySlot.GearClass]
+                    .GroupBy(id => IsSentry(id.PlayfabItemId))
+                    .ToDictionary(id => id.Key, id => id.ToList());
+                foreach (var _ in sentryTools[true])
+                {
+                    GearIdsBySlot[InventorySlot.GearClass].AddRange(sentryTools[false]);
+                }
+            }
+
+            GearSwapManager.SetPickUpSentryOnToolChange(PickUpSentryOnSwitch);
+            _rngWeaponsSelector = new RandomWeaponsSelector(GearIdsBySlot, SelectionType);
         }
 
-        private static List<T> ShuffleList<T>(IEnumerable<T> list)
+        public static void Randomize()
         {
-            return list.OrderBy(x => Rng.Next()).ToList();
+            WeaponRandomizerCore.log.LogInfo("Randomizing...");
+
+            Dictionary<string, string> gearIdBySlotPerPlayer;
+            switch (DistributionType)
+            {
+                case DistributionType.Equal:
+                    gearIdBySlotPerPlayer = _rngWeaponsSelector.PickNextEqualIds();
+                    break;
+                case DistributionType.Unique:
+                    gearIdBySlotPerPlayer = _rngWeaponsSelector.PickNextUniqueIds();
+                    break;
+                default:
+                    gearIdBySlotPerPlayer = _rngWeaponsSelector.PickNextRandomIds();
+                    break;
+            }
+            
+            foreach (var (playerName, ids) in gearIdBySlotPerPlayer)
+            {
+                var data = new RandomizerSync.WepRandomizerData {PlayerName = playerName, GearIds = ids};
+                if (playerName == SNet.LocalPlayer.NickName)
+                {
+                    EquipFromPacket(data);
+                }
+                else
+                {
+                    RandomizerSync.SyncRandomize(data);
+                }
+            }
+            OnRandomize?.Invoke();
         }
 
-        public void Randomize()
+        internal static void EquipFromPacket(RandomizerSync.WepRandomizerData data)
         {
-            WeaponRandomizerCore.log.LogInfo("Randomize!");
-            EquipFromRandomList();
+            if (SNet.LocalPlayer.NickName == data.PlayerName)
+            {
+                foreach (var gearId in data.GearIds.Split(','))
+                {
+                    GearSwapManager.RequestToEquip(GearIdsBySlot.SelectMany(id => id.Value).ToList()
+                        .Find(id => gearId == id.PlayfabItemId));
+                }
+            }
         }
         
-        private void EquipFromRandomList()
+        private static bool IsSentry(string id)
         {
-            foreach (var slot in SlotsToRandomize)
-            {
-                if (IndexBySlot[slot] >= GearIdBySlot[slot].Count)
-                {
-                    IndexBySlot[slot] = 0;
-                    GearIdBySlot[slot] = ShuffleList(GearIdBySlot[slot]);
-                }
-                GearSwapper.RequestToEquip(GearIdBySlot[slot][IndexBySlot[slot]]);
-                IndexBySlot[slot] = IndexBySlot[slot] + 1;
-            }
+            return id.IndexOf("sentry", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void OnDestroy()
         {
-            GearIdBySlot.Clear();
+            GearIdsBySlot.Clear();
         }
     }
 }

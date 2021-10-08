@@ -3,6 +3,7 @@ using GearSwapPlugin.GearSwap;
 using HarmonyLib;
 using UnityEngine;
 using WeaponRandomizerPlugin.WeaponRandomizer;
+using WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers;
 using WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggerSubjects;
 
 namespace WeaponRandomizerPlugin
@@ -30,7 +31,8 @@ namespace WeaponRandomizerPlugin
                     Object.DontDestroyOnLoad(gameObject);
 
                     gameObject.AddComponent<WeaponRandomizer.WeaponRandomizer>();
-                    gameObject.AddComponent<RandomizerTriggerMonitor>();
+                    gameObject.AddComponent<RandomizerTriggerManager>();
+                    gameObject.AddComponent<RandomizerSync>();
 
                     _go = gameObject;
                     break;
