@@ -12,7 +12,8 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
         private static readonly bool RandomizeOnSecDoorOpen = ConfigManager.RandomizeOnSecDoorOpen;
         private static readonly bool RandomizeOnTimer = ConfigManager.RandomizeByInterval > 0;
         private static readonly int TimerDuration = 1000 * ConfigManager.RandomizeByInterval;
-        private static readonly int TimerFuzz = 1000 * ConfigManager.IntervalFuzz;
+        private static readonly int TimerFuzz = 1000 * (ConfigManager.IntervalFuzz > 0 ? ConfigManager.IntervalFuzz : 0);
+        
         private static Timer _timer;
         private static bool _triggerTimedRandomize;
         private static bool _triggerSecDoorRandomize;

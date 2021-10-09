@@ -12,12 +12,10 @@ namespace WeaponRandomizerPlugin
         [HarmonyPatch(typeof(GameStateManager), "ChangeState", typeof(eGameStateName))]
         public static void Postfix(eGameStateName nextState) => AddWeaponRandomizerComponents(nextState);
 
-        private static void AddWeaponRandomizerComponents(eGameStateName? state = null)
+        private static void AddWeaponRandomizerComponents(eGameStateName state)
         {
             switch (state)
             {
-                case null:
-                    return;
                 case eGameStateName.StopElevatorRide:
                 {
                     WeaponRandomizerCore.log.LogMessage("Initializing " + WeaponRandomizerCore.NAME);

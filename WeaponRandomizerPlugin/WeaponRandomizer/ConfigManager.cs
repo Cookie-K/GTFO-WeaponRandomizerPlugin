@@ -10,11 +10,11 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         private static readonly ConfigFile ConfigFile = new ConfigFile(Path.Combine(Paths.ConfigPath, "WeaponRandomizer.cfg"), true);
 
         private static readonly ConfigEntry<DistributionType> DistType = ConfigFile
-            .Bind("Randomization Types", nameof (DistributionType), DistributionType.Unique, 
+            .Bind("Randomization Types", nameof (DistributionType), DistributionType.Random, 
                 "Chooses how weapons are distributed amongst players.\n" +
+                "Random: Every player gets random weapons.\n" +
                 "Unique: Every player gets a unique weapon.\n" +
-                "Equal: Every player gets the same weapon.\n" +
-                "Random: Every player gets random weapons.");
+                "Equal: Every player gets the same weapon.");
 
         private static readonly ConfigEntry<SelectionType> SelectType = ConfigFile
             .Bind("Randomization Types", nameof (SelectionType), SelectionType.SemiRandom, 

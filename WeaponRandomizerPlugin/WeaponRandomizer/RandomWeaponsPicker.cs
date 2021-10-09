@@ -77,9 +77,8 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
                     do
                     {
                         itemId = _gearListPerPlayer[player.NickName][slot].Next().PlayfabItemId;
-                        nextGearIds.Add(itemId);
                     } while (pickedGearIds.Contains(itemId));
-
+                    nextGearIds.Add(itemId);
                     pickedGearIds.Add(itemId);
                 }
                 gearIdsByPlayer.Add(player.NickName, string.Join(",", nextGearIds));
@@ -103,8 +102,9 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
        
         private class RngList
         {
-            private readonly Queue<string> _prevChosen = new Queue<string>();
-            private readonly List<GearIDRange> _list;
+            private readonly Queue<GearIDRange> _wepQueue = new Queue<GearIDRange>();
+            private readonly List<GearIDRange> _prevChosen = new List<GearIDRange>();
+            private readonly List<GearIDRange> _items;
             private readonly int _bufferLimit;
             private const int BufferMin = 2;
             private const int BufferMax = 3;
@@ -112,9 +112,18 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
 
             public RngList(List<GearIDRange> items)
             {
-                var countDistinct = items.GroupBy(id => id.PlayfabItemId).Select(id => id.First()).ToList().Count;
+                var distinctIds = items.GroupBy(id => id.PlayfabItemId).Select(id => id.First()).ToList();
+                var countDistinct = distinctIds.Count;
+                if (_treatSentryAsOne)
+                {
+                    countDistinct -= distinctIds.Count(id => IsSentry(id.PlayfabItemId));
+                }
                 _bufferLimit = countDistinct > BufferThreshold ? BufferMax : BufferMin;
-                _list = items;
+                _items = items.OrderBy(_ => Rng.Next()).ToList();
+                foreach (var item in _items)
+                {
+                    _wepQueue.Enqueue(item);
+                }
             }
 
             public GearIDRange Next()
@@ -123,28 +132,40 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
 
                 if (_type == SelectionType.SemiRandom)
                 {
+                    var i = 0;
                     do
                     {
-                        next = _list[Rng.Next(0, _list.Count)];
-                    } while (_prevChosen.Contains(next.PlayfabItemId) || _treatSentryAsOne && PrevPickedSentry(next.PlayfabItemId));
-                    _prevChosen.Enqueue(next.PlayfabItemId);
+                        next = _wepQueue.Dequeue();
+                        if (_prevChosen.Count >= _bufferLimit)
+                        { 
+                            i = Rng.Next(0, _prevChosen.Count);
+                            _wepQueue.Enqueue(_prevChosen[i]);
+                        }
+                        
+                    } while (_prevChosen.Any(id => id.PlayfabItemId == next.PlayfabItemId) || _treatSentryAsOne && PrevPickedSentry(next.PlayfabItemId));
+
                     if (_prevChosen.Count > _bufferLimit)
                     {
-                        _prevChosen.Dequeue();
+                        _prevChosen.RemoveAt(i);
                     }
+                    _prevChosen.Add(next);
                 }
                 else
                 {
-                    next = _list[Rng.Next(0, _list.Count)];
+                    next = _items[Rng.Next(0, _items.Count)];
                 }
 
                 return next;
             }
 
+            private bool IsSentry(string id)
+            {
+                return id.IndexOf("sentry", StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            
             private bool PrevPickedSentry(string next)
             {
-                Func<string, bool> isSentry = str => str.IndexOf("sentry", StringComparison.OrdinalIgnoreCase) >= 0;
-                return isSentry.Invoke(next) && _prevChosen.Any(isSentry);
+                return IsSentry(next) && _prevChosen.Any(id => IsSentry(id.PlayfabItemId));
             }
 
         }

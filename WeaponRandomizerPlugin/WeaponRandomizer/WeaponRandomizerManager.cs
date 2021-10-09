@@ -35,22 +35,10 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
 
         private void Start()
         {
-            if (RandomizeMelee)
-            {
-                SlotsToRandomize.Add(InventorySlot.GearMelee);
-            }
-            if (RandomizePrimary)
-            {
-                SlotsToRandomize.Add(InventorySlot.GearStandard);
-            }
-            if (RandomizeSecondary)
-            {
-                SlotsToRandomize.Add(InventorySlot.GearSpecial);
-            }
-            if (RandomizeTool)
-            {
-                SlotsToRandomize.Add(InventorySlot.GearClass);
-            }
+            if (RandomizeMelee) SlotsToRandomize.Add(InventorySlot.GearMelee);
+            if (RandomizePrimary) SlotsToRandomize.Add(InventorySlot.GearStandard);
+            if (RandomizeSecondary) SlotsToRandomize.Add(InventorySlot.GearSpecial);
+            if (RandomizeTool) SlotsToRandomize.Add(InventorySlot.GearClass);
             
             foreach (var slot in SlotsToRandomize)
             {
@@ -61,7 +49,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
                 }
             }
 
-            if (TreatSentriesAsOne && SlotsToRandomize.Contains(InventorySlot.GearClass))
+            if (TreatSentriesAsOne && RandomizeTool)
             {
                 // add non sentry items per sentry to increase chance of other tools appearing
                 var sentryTools = GearIdsBySlot[InventorySlot.GearClass]
@@ -79,25 +67,25 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
 
         public static void Randomize()
         {
-            WeaponRandomizerCore.log.LogInfo("Randomizing...");
+            WeaponRandomizerCore.log.LogInfo("Randomizing weapons...");
 
-            Dictionary<string, string> gearIdBySlotPerPlayer;
+            Dictionary<string, string> gearIdsByPlayer;
             switch (DistributionType)
             {
                 case DistributionType.Equal:
-                    gearIdBySlotPerPlayer = _rngWeaponsSelector.PickNextEqualIds();
+                    gearIdsByPlayer = _rngWeaponsSelector.PickNextEqualIds();
                     break;
                 case DistributionType.Unique:
-                    gearIdBySlotPerPlayer = _rngWeaponsSelector.PickNextUniqueIds();
+                    gearIdsByPlayer = _rngWeaponsSelector.PickNextUniqueIds();
                     break;
                 default:
-                    gearIdBySlotPerPlayer = _rngWeaponsSelector.PickNextRandomIds();
+                    gearIdsByPlayer = _rngWeaponsSelector.PickNextRandomIds();
                     break;
             }
             
-            foreach (var (playerName, ids) in gearIdBySlotPerPlayer)
+            foreach (var (playerName, ids) in gearIdsByPlayer)
             {
-                var data = new RandomizerSync.WepRandomizerData {PlayerName = playerName, GearIds = ids};
+                var data = new RandomizerSync.WeaponRandomizerData {PlayerName = playerName, GearIds = ids};
                 if (playerName == SNet.LocalPlayer.NickName)
                 {
                     EquipFromPacket(data);
@@ -110,15 +98,13 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
             OnRandomize?.Invoke();
         }
 
-        internal static void EquipFromPacket(RandomizerSync.WepRandomizerData data)
+        internal static void EquipFromPacket(RandomizerSync.WeaponRandomizerData data)
         {
-            if (SNet.LocalPlayer.NickName == data.PlayerName)
+            if (SNet.LocalPlayer.NickName != data.PlayerName) return;
+            
+            foreach (var gearId in data.GearIds.Split(','))
             {
-                foreach (var gearId in data.GearIds.Split(','))
-                {
-                    GearSwapManager.RequestToEquip(GearIdsBySlot.SelectMany(id => id.Value).ToList()
-                        .Find(id => gearId == id.PlayfabItemId));
-                }
+                GearSwapManager.RequestToEquip(GearIdsBySlot.SelectMany(id => id.Value).ToList().Find(id => gearId == id.PlayfabItemId));
             }
         }
         

@@ -8,8 +8,10 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
 {
     public class RandomizerSync : MonoBehaviour
     {
+        private const string TriggerEventName = "Trigger_Weapon_Randomize";
+
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public struct WepRandomizerData {
+        public struct WeaponRandomizerData {
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 50)]
             public string PlayerName;
 
@@ -24,28 +26,21 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
 
         private void Start()
         {
-            NetworkingManager.RegisterEvent<WepRandomizerData>("Trigger_Randomize",  (senderId, packet) => 
+            if (!NetworkingManager.IsEventRegistered(TriggerEventName))
             {
-                WeaponRandomizerCore.log.LogInfo($"Packet received for {packet.PlayerName}: {packet.GearIds}");
-                WeaponRandomizerManager.EquipFromPacket(packet);
-            });
-        }
-
-        internal static void SyncRandomize(Dictionary<string, WepRandomizerData> dataPerPlayer)
-        {
-            foreach (var data in dataPerPlayer.Values)
-            {
-                NetworkingManager.InvokeEvent("Trigger_Randomize", data);
-                WeaponRandomizerCore.log.LogInfo($"For {data.PlayerName}");
-                WeaponRandomizerCore.log.LogInfo($"{data.GearIds}");
+                NetworkingManager.RegisterEvent<WeaponRandomizerData>(TriggerEventName,  (senderId, packet) => 
+                {
+                    WeaponRandomizerCore.log.LogInfo($"Packet received for {packet.PlayerName}: {packet.GearIds}");
+                    WeaponRandomizerManager.EquipFromPacket(packet);
+                });
             }
         }
-        
-        internal static void SyncRandomize(WepRandomizerData data)
+
+        internal static void SyncRandomize(WeaponRandomizerData data)
         {
-            NetworkingManager.InvokeEvent("Trigger_Randomize", data);
-            WeaponRandomizerCore.log.LogInfo($"For {data.PlayerName}");
-            WeaponRandomizerCore.log.LogInfo($"{data.GearIds}");
+            WeaponRandomizerCore.log.LogInfo($"Sending Randomize signal for {data.PlayerName}: {data.GearIds}");
+            NetworkingManager.InvokeEvent(TriggerEventName, data);
         }
+
     }
 }
