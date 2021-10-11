@@ -49,25 +49,18 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
                 }
             }
 
-            if (TreatSentriesAsOne && RandomizeTool)
-            {
-                // add non sentry items per sentry to increase chance of other tools appearing
-                var sentryTools = GearIdsBySlot[InventorySlot.GearClass]
-                    .GroupBy(id => IsSentry(id.PlayfabItemId))
-                    .ToDictionary(id => id.Key, id => id.ToList());
-                foreach (var _ in sentryTools[true])
-                {
-                    GearIdsBySlot[InventorySlot.GearClass].AddRange(sentryTools[false]);
-                }
-            }
-
             GearSwapManager.SetPickUpSentryOnToolChange(PickUpSentryOnSwitch);
             _rngWeaponsSelector = new RandomWeaponsSelector(GearIdsBySlot, SelectionType);
         }
 
+        /// <summary>
+        /// Randomise the players equipped weapons
+        /// If player is host, it will equip it self with the new weapons and broad cast the weapons to equip to clients
+        /// If player is a client, it will only equip weapons when message from host is received  
+        /// </summary>
         public static void Randomize()
         {
-            WeaponRandomizerCore.log.LogInfo("Randomizing weapons...");
+            WeaponRandomizerCore.log.LogInfo("Randomizing weapons");
 
             Dictionary<string, string> gearIdsByPlayer;
             switch (DistributionType)

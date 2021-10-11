@@ -9,9 +9,18 @@ using WeaponRandomizerPlugin.WeaponRandomizer.@enum;
 namespace WeaponRandomizerPlugin.WeaponRandomizer
 {
 
+    /// <summary>
+    /// Handles weapon selection randomly or semi randomly
+    /// Random selection will select any weapons at random
+    /// Semi random will use a buffer to store previous weapons and select the next time from a queue to avoid
+    /// the same weapons from being picked multiple times in a row
+    ///
+    /// Treat sentry as one will reduce the chances of selecting a sentry such that other tool types are seen just as often 
+    /// </summary>
     public class RandomWeaponsSelector
     {
         private static readonly Random Rng = new Random();
+        private static readonly int MinWeapons = 4;
         private static readonly List<InventorySlot> SlotsToRandomize = new List<InventorySlot>();
         
         private static SelectionType _type;
@@ -77,7 +86,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
                     do
                     {
                         itemId = _gearListPerPlayer[player.NickName][slot].Next().PlayfabItemId;
-                    } while (pickedGearIds.Contains(itemId));
+                    } while (_gearListPerPlayer[player.NickName][slot].Count() >= MinWeapons && pickedGearIds.Contains(itemId));
                     nextGearIds.Add(itemId);
                     pickedGearIds.Add(itemId);
                 }
@@ -105,67 +114,86 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
             private readonly Queue<GearIDRange> _wepQueue = new Queue<GearIDRange>();
             private readonly List<GearIDRange> _prevChosen = new List<GearIDRange>();
             private readonly List<GearIDRange> _items;
-            private readonly int _bufferLimit;
+            private readonly SelectionType _selectionType;
+            private readonly int _nUniqueItems;
             private const int BufferMin = 2;
             private const int BufferMax = 3;
             private const int BufferThreshold = 5;
 
-            public RngList(List<GearIDRange> items)
+            public RngList(IEnumerable<GearIDRange> items)
             {
-                var distinctIds = items.GroupBy(id => id.PlayfabItemId).Select(id => id.First()).ToList();
-                var countDistinct = distinctIds.Count;
+                _items = items.OrderBy(_ => Rng.Next()).ToList();
+                _nUniqueItems = _items.Count;
                 if (_treatSentryAsOne)
                 {
-                    countDistinct -= distinctIds.Count(id => IsSentry(id.PlayfabItemId));
+                    _nUniqueItems -= _items.Count(id => IsSentry(id.PlayfabItemId));
                 }
-                _bufferLimit = countDistinct > BufferThreshold ? BufferMax : BufferMin;
-                _items = items.OrderBy(_ => Rng.Next()).ToList();
+
+                _selectionType = _nUniqueItems <= BufferMin ? SelectionType.Random : _type;
+                var bufferLimit = _nUniqueItems <= BufferMin ? 0 : _nUniqueItems > BufferThreshold ? BufferMax : BufferMin;
                 foreach (var item in _items)
                 {
-                    _wepQueue.Enqueue(item);
+                    if (_prevChosen.Count >= bufferLimit)
+                    {
+                        _wepQueue.Enqueue(item);
+                    }
+                    else
+                    {
+                        _prevChosen.Add(item);
+                    }
                 }
             }
 
             public GearIDRange Next()
             {
                 GearIDRange next;
-
-                if (_type == SelectionType.SemiRandom)
+                
+                if (_selectionType == SelectionType.SemiRandom)
                 {
-                    var i = 0;
-                    do
+                    var index = Rng.Next(0, _prevChosen.Count);
+                    next = _wepQueue.Dequeue();
+                    while (!CanPickItem(next.PlayfabItemId))
                     {
+                        _wepQueue.Enqueue(next);
                         next = _wepQueue.Dequeue();
-                        if (_prevChosen.Count >= _bufferLimit)
-                        { 
-                            i = Rng.Next(0, _prevChosen.Count);
-                            _wepQueue.Enqueue(_prevChosen[i]);
-                        }
-                        
-                    } while (_prevChosen.Any(id => id.PlayfabItemId == next.PlayfabItemId) || _treatSentryAsOne && PrevPickedSentry(next.PlayfabItemId));
-
-                    if (_prevChosen.Count > _bufferLimit)
-                    {
-                        _prevChosen.RemoveAt(i);
                     }
+                    _wepQueue.Enqueue(_prevChosen[index]);
+                    _prevChosen.RemoveAt(index);
                     _prevChosen.Add(next);
                 }
                 else
                 {
-                    next = _items[Rng.Next(0, _items.Count)];
+                    do
+                    {
+                        next = _items[Rng.Next(0, _items.Count)];
+                    } while (!CanPickItem(next.PlayfabItemId));
                 }
 
                 return next;
             }
 
-            private bool IsSentry(string id)
+            public int Count()
+            {
+                return _items.Count;
+            }
+
+            private static bool IsSentry(string id)
             {
                 return id.IndexOf("sentry", StringComparison.OrdinalIgnoreCase) >= 0;
             }
             
-            private bool PrevPickedSentry(string next)
+            private bool CanPickItem(string next)
             {
-                return IsSentry(next) && _prevChosen.Any(id => IsSentry(id.PlayfabItemId));
+                var isSentry = IsSentry(next);
+                var probabilityCheck = Rng.Next(_nUniqueItems) == 0;
+
+                if (_type == SelectionType.SemiRandom)
+                {
+                    var isSentryInPrev = _prevChosen.Any(id => IsSentry(id.PlayfabItemId));
+                    return !_treatSentryAsOne || !isSentry || !isSentryInPrev && probabilityCheck;
+                }
+
+                return !_treatSentryAsOne || !isSentry || probabilityCheck;
             }
 
         }

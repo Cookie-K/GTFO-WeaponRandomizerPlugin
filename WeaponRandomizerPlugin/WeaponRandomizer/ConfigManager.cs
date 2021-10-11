@@ -20,7 +20,8 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
             .Bind("Randomization Types", nameof (SelectionType), SelectionType.SemiRandom, 
                 "Chooses how weapons are picked for individual players.\n" +
                 "Random: Randomly picks a weapon, can have repeating weapons in a row.\n" +
-                "SemiRandom: Picks a weapon from a shuffled queue. No repeating weapons in a row and will go through every weapon available at random order.");
+                "SemiRandom: Picks a weapon from a shuffled queue. Very unlikely to have repeating weapons in a row " +
+                "and will go through every weapon available at a random order.");
 
         private static readonly ConfigEntry<bool> Door = ConfigFile
             .Bind("Randomization Triggers", nameof (RandomizeOnSecDoorOpen), false, "Randomize on security door open.");
@@ -28,10 +29,10 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         private static readonly ConfigEntry<int> Timer = ConfigFile
             .Bind("Randomization Triggers", nameof (RandomizeByInterval), 180, "In seconds, randomize on this interval. 0s for Not at all");
 
-        private static readonly ConfigEntry<int> Fuzz = ConfigFile
-            .Bind("Randomization Triggers", nameof (IntervalFuzz), 0, 
-                "If randomizing by interval, fuzz the interval.\n" +
-                "Eg. if Interval is 60s and fuzz is 10s, the interval will be randomly set on every trigger to be a time between 50s or 70s");
+        private static readonly ConfigEntry<int> Alter = ConfigFile
+            .Bind("Randomization Triggers", nameof (AlterInterval), 0, 
+                "If randomizing by interval, alter the interval duration every interval.\n" +
+                "Eg. if Interval is 60s and alter is set to 10s, the interval will be randomly set on every trigger to be a time between 50s or 70s");
 
         private static readonly ConfigEntry<bool> Melee = ConfigFile
             .Bind("Randomization Slots", nameof (RandomizeMelee), true, "Randomize Melee weapons.");
@@ -59,7 +60,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         public static SelectionType SelectionType => SelectType.Value;
         public static bool RandomizeOnSecDoorOpen => Door.Value;
         public static int RandomizeByInterval => Timer.Value;
-        public static int IntervalFuzz => Fuzz.Value;
+        public static int AlterInterval => Alter.Value;
         public static bool RandomizeMelee => Melee.Value;
         public static bool RandomizePrimary => Standard.Value;
         public static bool RandomizeSecondary => Special.Value;

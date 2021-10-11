@@ -30,7 +30,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
             {
                 NetworkingManager.RegisterEvent<WeaponRandomizerData>(TriggerEventName,  (senderId, packet) => 
                 {
-                    WeaponRandomizerCore.log.LogInfo($"Packet received for {packet.PlayerName}: {packet.GearIds}");
+                    WeaponRandomizerCore.log.LogInfo($"Weapon Randomizer packet received for {packet.PlayerName}: {packet.GearIds}");
                     WeaponRandomizerManager.EquipFromPacket(packet);
                 });
             }
@@ -38,7 +38,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
 
         internal static void SyncRandomize(WeaponRandomizerData data)
         {
-            WeaponRandomizerCore.log.LogInfo($"Sending Randomize signal for {data.PlayerName}: {data.GearIds}");
+            WeaponRandomizerCore.log.LogInfo($"Broadcasting weapon randomize signal for {data.PlayerName}: {data.GearIds}");
             NetworkingManager.InvokeEvent(TriggerEventName, data);
         }
 

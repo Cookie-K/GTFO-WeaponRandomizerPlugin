@@ -6,13 +6,16 @@ using Timer = System.Threading.Timer;
 
 namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
 {
+    /// <summary>
+    /// Manages triggers for the weapon randomizer 
+    /// </summary>
     public class RandomizerTriggerManager : MonoBehaviour
     {
         private static readonly Random Rng = new Random();
         private static readonly bool RandomizeOnSecDoorOpen = ConfigManager.RandomizeOnSecDoorOpen;
         private static readonly bool RandomizeOnTimer = ConfigManager.RandomizeByInterval > 0;
         private static readonly int TimerDuration = 1000 * ConfigManager.RandomizeByInterval;
-        private static readonly int TimerFuzz = 1000 * (ConfigManager.IntervalFuzz > 0 ? ConfigManager.IntervalFuzz : 0);
+        private static readonly int TimerAlterTime = 1000 * (ConfigManager.AlterInterval > 0 ? ConfigManager.AlterInterval : 0);
         
         private static Timer _timer;
         private static bool _triggerTimedRandomize;
@@ -33,9 +36,9 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
             {
                 RandomizerTriggerPatcher.OnSecDoorOpen += OnSecDoorOpen;
             }
-            if (TimerDuration > 0 && TimerFuzz > 0)
+            if (TimerDuration > 0 && TimerAlterTime > 0)
             {
-                WeaponRandomizerManager.OnRandomize += FuzzInterval;
+                WeaponRandomizerManager.OnRandomize += AlterInterval;
             }
         }
 
@@ -70,18 +73,18 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
             }
         }
 
-        private void StartTimer()
+        private static void StartTimer()
         {
             _timer = new Timer(arg => _triggerTimedRandomize = true, null, 0, TimerDuration);
         }
 
-        private void FuzzInterval()
+        private static void AlterInterval()
         {
-            var timerDuration = TimerDuration + Rng.Next(-TimerFuzz, TimerFuzz);
+            var timerDuration = TimerDuration + Rng.Next(-TimerAlterTime, TimerAlterTime);
             _timer.Change(timerDuration, timerDuration);
         }
 
-        private void EndTimer()
+        private static void EndTimer()
         {
             _timer.Dispose();
         }
@@ -96,9 +99,9 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
             {
                 RandomizerTriggerPatcher.OnSecDoorOpen -= OnSecDoorOpen;
             }
-            if (TimerDuration > 0 && TimerFuzz > 0)
+            if (TimerDuration > 0 && TimerAlterTime > 0)
             {
-                WeaponRandomizerManager.OnRandomize -= FuzzInterval;
+                WeaponRandomizerManager.OnRandomize -= AlterInterval;
             }
         }
     }
