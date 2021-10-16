@@ -25,7 +25,6 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
         private static readonly bool RandomizePrimary = ConfigManager.RandomizePrimary;
         private static readonly bool RandomizeSecondary = ConfigManager.RandomizeSecondary;
         private static readonly bool RandomizeTool = ConfigManager.RandomizeTool;
-        private static readonly bool TreatSentriesAsOne = ConfigManager.TreatSentriesAsOne;
         private static readonly bool PickUpSentryOnSwitch = ConfigManager.PickUpSentryOnSwitch;
 
         public WeaponRandomizerManager(IntPtr intPtr) : base(intPtr)
