@@ -99,11 +99,6 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer
                 GearSwapManager.RequestToEquip(GearIdsBySlot.SelectMany(id => id.Value).ToList().Find(id => gearId == id.PlayfabItemId));
             }
         }
-        
-        private static bool IsSentry(string id)
-        {
-            return id.IndexOf("sentry", StringComparison.OrdinalIgnoreCase) >= 0;
-        }
 
         private void OnDestroy()
         {

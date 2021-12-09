@@ -1,0 +1,10 @@
+{
+    "name": "WeaponRandomizer",
+    "version_number": "1.0.1",
+    "website_url": "https://github.com/thunderstore-io",
+    "description": "Randomize player loadouts while in an expedition.",
+    "dependencies": [
+        "BepInEx-BepInExPack_GTFO-1.5.0",
+        "Cookie_K-GearSwapAPI-1.0.0"
+    ]
+}

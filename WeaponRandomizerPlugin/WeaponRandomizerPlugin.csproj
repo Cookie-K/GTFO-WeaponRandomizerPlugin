@@ -95,6 +95,9 @@
         <Reference Include="GlobalFramework-ASM, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
           <HintPath>C:\Users\Kukai\AppData\Roaming\r2modmanPlus-local\GTFO\profiles\GTFO-WeaponRandomizerPlugin\BepInEx\unhollowed\GlobalFramework-ASM.dll</HintPath>
         </Reference>
+        <Reference Include="GTFO-API, Version=0.1.2.0, Culture=neutral, PublicKeyToken=null">
+          <HintPath>C:\Users\Kukai\AppData\Roaming\r2modmanPlus-local\GTFO\profiles\GTFO-CinemaTest\BepInEx\plugins\GTFO-API.dll</HintPath>
+        </Reference>
         <Reference Include="GUIX-ASM, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
           <HintPath>C:\Users\Kukai\AppData\Roaming\r2modmanPlus-local\GTFO\profiles\GTFO-WeaponRandomizerPlugin\BepInEx\unhollowed\GUIX-ASM.dll</HintPath>
         </Reference>
@@ -178,9 +181,6 @@
         </Reference>
         <Reference Include="Newtonsoft.Json, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
           <HintPath>C:\Users\Kukai\AppData\Roaming\r2modmanPlus-local\GTFO\profiles\GTFO-WeaponRandomizerPlugin\BepInEx\unhollowed\Newtonsoft.Json.dll</HintPath>
-        </Reference>
-        <Reference Include="Nidhogg, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>C:\Users\Kukai\AppData\Roaming\r2modmanPlus-local\GTFO\profiles\playGround\BepInEx\plugins\Kasuromi-Nidhogg\Nidhogg.dll</HintPath>
         </Reference>
         <Reference Include="PlayFab-ASM, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
           <HintPath>C:\Users\Kukai\AppData\Roaming\r2modmanPlus-local\GTFO\profiles\GTFO-WeaponRandomizerPlugin\BepInEx\unhollowed\PlayFab-ASM.dll</HintPath>

@@ -17,7 +17,7 @@ namespace WeaponRandomizerPlugin
             MODNAME = "WeaponRandomizer",
             AUTHOR = "Cookie_K",
             GUID = "com." + AUTHOR + "." + MODNAME,
-            VERSION = "0.0.0";
+            VERSION = "1.0.1";
 
         public static ManualLogSource log;
 
@@ -33,11 +33,6 @@ namespace WeaponRandomizerPlugin
 
             HarmonyPatches = new Harmony(GUID);
             HarmonyPatches.PatchAll();
-            
-            foreach (var method in HarmonyPatches.GetPatchedMethods())
-            {
-                log.LogInfo("Patched method: " + method);
-            }
         }
     }
 }

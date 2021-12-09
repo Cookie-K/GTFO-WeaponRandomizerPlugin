@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Nidhogg.Managers;
+using GTFO.API;
 using UnityEngine;
 
 namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
@@ -26,9 +25,9 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
 
         private void Start()
         {
-            if (!NetworkingManager.IsEventRegistered(TriggerEventName))
+            if (!NetworkAPI.IsEventRegistered(TriggerEventName))
             {
-                NetworkingManager.RegisterEvent<WeaponRandomizerData>(TriggerEventName,  (senderId, packet) => 
+                NetworkAPI.RegisterEvent<WeaponRandomizerData>(TriggerEventName,  (senderId, packet) => 
                 {
                     WeaponRandomizerCore.log.LogInfo($"Weapon Randomizer packet received for {packet.PlayerName}: {packet.GearIds}");
                     WeaponRandomizerManager.EquipFromPacket(packet);
@@ -39,7 +38,7 @@ namespace WeaponRandomizerPlugin.WeaponRandomizer.RandomizerTriggers
         internal static void SyncRandomize(WeaponRandomizerData data)
         {
             WeaponRandomizerCore.log.LogInfo($"Broadcasting weapon randomize signal for {data.PlayerName}: {data.GearIds}");
-            NetworkingManager.InvokeEvent(TriggerEventName, data);
+            NetworkAPI.InvokeEvent(TriggerEventName, data);
         }
 
     }
