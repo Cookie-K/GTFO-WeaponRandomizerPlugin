@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaponRandomizerPlugin", "WeaponRandomizerPlugin\WeaponRandomizerPlugin.csproj", "{602CC8FD-56C8-4437-8DE3-8316B2AE107F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GTFO-WeaponRandomizerPlugin", "GTFO-WeaponRandomizerPlugin\GTFO-WeaponRandomizerPlugin.csproj", "{FFA8110A-6DAC-4F2F-B6B5-2E9E22766915}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{602CC8FD-56C8-4437-8DE3-8316B2AE107F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{602CC8FD-56C8-4437-8DE3-8316B2AE107F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{602CC8FD-56C8-4437-8DE3-8316B2AE107F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{602CC8FD-56C8-4437-8DE3-8316B2AE107F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFA8110A-6DAC-4F2F-B6B5-2E9E22766915}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFA8110A-6DAC-4F2F-B6B5-2E9E22766915}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFA8110A-6DAC-4F2F-B6B5-2E9E22766915}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFA8110A-6DAC-4F2F-B6B5-2E9E22766915}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
